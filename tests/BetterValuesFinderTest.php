@@ -1,6 +1,6 @@
 <?php
 
-class ProcessorTest extends \PHPUnit_Framework_TestCase
+class BetterValuesFinderTest extends \PHPUnit_Framework_TestCase
 {
     private function getComparator()
     {
@@ -16,8 +16,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
 
     public function testEmpty()
     {
-        $p = new Processor([], $this->getComparator());
-        $this->assertEquals([], $p->process());
+        $p = new BetterValuesFinder([], $this->getComparator());
+        $this->assertEquals([], $p->getBest());
     }
 
     public function testOne()
@@ -25,8 +25,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
         $item = 1;
         $box = new Box($item);
         $list = [$box];
-        $p = new Processor($list, $this->getComparator());
-        $this->assertEquals([$item], $p->process());
+        $p = new BetterValuesFinder($list, $this->getComparator());
+        $this->assertEquals([$item], $p->getBest());
     }
 
     public function testSingleShunt()
@@ -41,8 +41,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(20),
         ];
 
-        $p = new Processor($items, $this->getComparator());
-        $this->assertEquals([1, 2, 10], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator());
+        $this->assertEquals([1, 2, 10], $p->getBest());
     }
 
     public function testInsertBackwards()
@@ -58,8 +58,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(20),
         ];
 
-        $p = new Processor($items, $this->getComparator());
-        $this->assertEquals([1, 2, 3], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator());
+        $this->assertEquals([1, 2, 3], $p->getBest());
     }
 
     public function testNotShunted()
@@ -74,8 +74,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(3),
         ];
 
-        $p = new Processor($items, $this->getComparator());
-        $this->assertEquals([1, 2, 3], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator());
+        $this->assertEquals([1, 2, 3], $p->getBest());
 
     }
 
@@ -92,8 +92,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(5),
         ];
 
-        $p = new Processor($items, $this->getComparator());
-        $this->assertEquals([1, 2, 3], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator());
+        $this->assertEquals([1, 2, 3], $p->getBest());
 
     }
 
@@ -101,8 +101,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
     public function testNoIterations()
     {
         $items = [new Box(1), new Box(2)];
-        $p = new Processor($items, $this->getComparator());
-        $this->assertEquals([1, 2], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator());
+        $this->assertEquals([1, 2], $p->getBest());
 
     }
 
@@ -118,8 +118,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(4),
         ];
 
-        $p = new Processor($items, $this->getComparator(), 4);
-        $this->assertEquals([1, 2, 3, 4], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator(), 4);
+        $this->assertEquals([1, 2, 3, 4], $p->getBest());
     }
 
 
@@ -133,8 +133,8 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(1, $generator()),
         ];
 
-        $p = new Processor($items, $this->getComparator(), 10);
-        $this->assertEquals([1, 2], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator(), 10);
+        $this->assertEquals([1, 2], $p->getBest());
     }
 
 
@@ -146,7 +146,7 @@ class ProcessorTest extends \PHPUnit_Framework_TestCase
             new Box(3),
         ];
 
-        $p = new Processor($items, $this->getComparator(), 2);
-        $this->assertEquals([1, 2], $p->process());
+        $p = new BetterValuesFinder($items, $this->getComparator(), 2);
+        $this->assertEquals([1, 2], $p->getBest());
     }
 }

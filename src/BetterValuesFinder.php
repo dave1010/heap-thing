@@ -1,6 +1,11 @@
 <?php
 
-class Processor
+/**
+ * Find the best set of values
+ *
+ * Values are based on an initial set and values returned from iterators
+ */
+class BetterValuesFinder
 {
     /** @var callable */
     private $comparator;
@@ -11,22 +16,22 @@ class Processor
     private $values = [];
 
     /**
-     * @param array $values values to start from
+     * @param Box[] $boxes values with iterators to start from
      * @param callable $comparator how to compare values
      * @param int|null $limit maximum number of values to return when processed
      */
-    public function __construct(array $values, callable $comparator, $limit = null)
+    public function __construct(array $boxes, callable $comparator, $limit = null)
     {
         $this->comparator = $comparator;
-        $this->limit = ($limit === null) ? count($values) : $limit;
+        $this->limit = ($limit === null) ? count($boxes) : $limit;
 
-        foreach ($values as $value) {
+        foreach ($boxes as $value) {
             $this->insert($value);
         }
     }
 
     /** @return array */
-    public function process()
+    public function getBest()
     {
         // how many results need to be checked
         $checksRequired = $this->limit;
