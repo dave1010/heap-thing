@@ -53,7 +53,13 @@ class BetterValuesFinder
                     continue;
                 }
 
-                $this->insert(new Box($iterator->current(), $iterator));
+                $inserted = $this->insert(new Box($iterator->current(), $iterator));
+
+                // iterators are no longer producing good values
+                if (!$inserted) {
+                    $checksRequired = 0;
+                    break;
+                }
 
                 $iterator->next();
 
@@ -90,5 +96,7 @@ class BetterValuesFinder
         if (count($this->boxes) > $this->limit) {
             array_pop($this->boxes);
         }
+
+        return in_array($box, $this->boxes, true);
     }
 }
