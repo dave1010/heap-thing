@@ -25,7 +25,7 @@ class BetterValuesFinder
     public function __construct(array $boxes, callable $comparator, $limit = null)
     {
         // make $comparator work with Boxes
-        $this->comparator = function(Box $a, Box $b) use ($comparator) {
+        $this->comparator = function (Box $a, Box $b) use ($comparator) {
             return $comparator($a->getValue(), $b->getValue());
         };
 
