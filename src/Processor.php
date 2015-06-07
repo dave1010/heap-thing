@@ -36,15 +36,15 @@ class Processor
             /** @var Box $item */
             foreach ($this->values as $item) {
 
-                $generator = $item->getGenerator();
-                if (!$generator || !$generator->valid()) {
+                $iterator = $item->getIterator();
+                if (!$iterator || !$iterator->valid()) {
                     $checksRequired--;
                     continue;
                 }
 
-                $this->insert(new Box($generator->current(), $generator));
+                $this->insert(new Box($iterator->current(), $iterator));
 
-                $generator->next();
+                $iterator->next();
 
                 break;
             }
@@ -73,6 +73,7 @@ class Processor
     {
         $this->values[] = $value;
 
+        // this resorts all values, when inserting to a heap would be better
         usort($this->values, $this->comparator);
 
         if (count($this->values) > $this->limit) {

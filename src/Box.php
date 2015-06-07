@@ -5,13 +5,13 @@ final class Box
     /** @var mixed */
     private $value;
 
-    /** @var Generator */
-    private $generator;
+    /** @var Iterator */
+    private $iterator;
 
-    public function __construct($value, Generator $generator = null)
+    public function __construct($value, Iterator $iterator = null)
     {
         $this->value = $value;
-        $this->generator = $generator;
+        $this->iterator = $iterator;
     }
 
     /** @return mixed */
@@ -20,9 +20,9 @@ final class Box
         return $this->value;
     }
 
-    /** @return Generator */
-    public function getGenerator()
+    /** @return Iterator */
+    public function getIterator()
     {
-        return $this->generator;
+        return $this->iterator;
     }
 }
