@@ -9,8 +9,6 @@ final class Box
     /** @var Generator */
     private $generator;
 
-    private $checked = false;
-
     public function __construct($value, Generator $generator = null)
     {
         $this->value = $value;
@@ -27,16 +25,5 @@ final class Box
     public function getGenerator()
     {
         return $this->generator;
-    }
-
-    /** @return boolean */
-    public function isChecked()
-    {
-        return $this->checked;
-    }
-
-    public function markChecked()
-    {
-        $this->checked = true;
     }
 }

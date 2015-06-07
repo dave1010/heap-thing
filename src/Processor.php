@@ -1,88 +1,135 @@
 <?php
 
-class Processor
+class Processor implements Iterator, Countable
 {
-    /** @var Box[] */
-    private $items;
+    /** @var callable */
+    private $comparator;
 
-    public function __construct(array $items)
+    /** @var int */
+    private $max;
+
+    private $values = [];
+
+    private $currentKey;
+
+    /**
+     * @param array $items
+     * @param callable $comparator
+     */
+    public function __construct(array $items, $comparator, $max = null)
     {
-        $this->items = $items;
+        $this->max = ($max === null) ? count($items) : $max;
+        $this->comparator = $comparator;
+
+        foreach ($items as $item) {
+            $this->insert($item);
+        }
     }
 
+    /**
+     * @param int|null $max
+     * @return Traversable
+     */
     public function process()
     {
-
-        $best = [];
-        $items = $this->items;
-
-        $max = count($items);
-
-        $checksRequired = $max;
         // how many results need to be checked
-
-        $compare = function ($a, $b) {
-            $a = $a->getValue();
-            $b = $b->getValue();
-            if ($a === $b) {
-                return 0;
-            }
-            return ($a > $b) ? -1 : 1;
-        };
-
-
-        $items = new SlicedHeap($max, $compare);
-        foreach ($this->items as $item) {
-            $items->insert($item);
-        }
-//var_dump(iterator_to_array($items));die();
-
-        //new SplMaxHeap()
-
+        $checksRequired = $this->max;
 
         while ($checksRequired) {
 
             /** @var Box $item */
-            foreach ($items as $item) {
-                if ($item->isChecked()) {
-                    continue;
-                }
-
-                // this item needs checking
+            foreach ($this as $item) {
 
                 $generator = $item->getGenerator();
                 if (!$generator || !$generator->valid()) {
-                    $item->markChecked();
                     $checksRequired--;
                     continue;
                 }
 
-                $items[] = new Box($generator->current(), $generator);
-                //usort($items, $compare);
-                //$items = array_slice($items, 0, $max);
-                $generator->next();
+                $this->insert(new Box($generator->current(), $generator));
 
+                $generator->next();
 
                 break;
             }
-
-            // TODO: either $items needs array access, or iterate
-            //$item = $items[$cursor];
         }
 
-        $values = $this->unBox($items);
+        $values = $this->unBox($this);
 
         return $values;
     }
 
     /**
      * @param $items Box[]
-     * @return array mixed
+     * @return \Traversable mixed
      */
     private function unBox($items)
     {
-        return array_map(function (Box $box) {
-            return $box->getValue();
-        }, $items);
+        $values = [];
+
+        foreach ($items as $item) {
+            $values[] = $item->getValue();
+        }
+
+        return $values;
+    }
+
+    public function insert($value)
+    {
+        $this->values[] = $value;
+
+        usort($this->values, $this->comparator);
+
+        if ($this->count() > $this->max) {
+            array_pop($this->values);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function current()
+    {
+        return $this->values[$this->currentKey];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function next()
+    {
+        $this->currentKey++;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function key()
+    {
+        return $this->currentKey;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function valid()
+    {
+        return array_key_exists($this->currentKey, $this->values);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rewind()
+    {
+        $this->currentKey = 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->values);
     }
 }
