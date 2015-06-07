@@ -1,14 +1,16 @@
 <?php
 
+namespace Base\BetterValues;
+
 final class Box
 {
     /** @var mixed */
     private $value;
 
-    /** @var Iterator */
+    /** @var \Iterator */
     private $iterator;
 
-    public function __construct($value, Iterator $iterator = null)
+    public function __construct($value, \Iterator $iterator = null)
     {
         $this->value = $value;
         $this->iterator = $iterator;
@@ -20,7 +22,7 @@ final class Box
         return $this->value;
     }
 
-    /** @return Iterator */
+    /** @return \Iterator */
     public function getIterator()
     {
         return $this->iterator;

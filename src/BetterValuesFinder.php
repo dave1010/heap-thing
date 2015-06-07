@@ -1,5 +1,7 @@
 <?php
 
+namespace Base\BetterValues;
+
 /**
  * Find the best set of values
  *
