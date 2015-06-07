@@ -1,44 +1,40 @@
 <?php
 
-class Processor implements Iterator, Countable
+class Processor
 {
     /** @var callable */
     private $comparator;
 
     /** @var int */
-    private $max;
+    private $limit;
 
     private $values = [];
 
-    private $currentKey;
-
     /**
-     * @param array $items
-     * @param callable $comparator
+     * @param array $values values to start from
+     * @param callable $comparator how to compare values
+     * @param int|null $limit maximum number of values to return when processed
      */
-    public function __construct(array $items, $comparator, $max = null)
+    public function __construct(array $values, callable $comparator, $limit = null)
     {
-        $this->max = ($max === null) ? count($items) : $max;
         $this->comparator = $comparator;
+        $this->limit = ($limit === null) ? count($values) : $limit;
 
-        foreach ($items as $item) {
-            $this->insert($item);
+        foreach ($values as $value) {
+            $this->insert($value);
         }
     }
 
-    /**
-     * @param int|null $max
-     * @return Traversable
-     */
+    /** @return array */
     public function process()
     {
         // how many results need to be checked
-        $checksRequired = $this->max;
+        $checksRequired = $this->limit;
 
         while ($checksRequired) {
 
             /** @var Box $item */
-            foreach ($this as $item) {
+            foreach ($this->values as $item) {
 
                 $generator = $item->getGenerator();
                 if (!$generator || !$generator->valid()) {
@@ -54,82 +50,33 @@ class Processor implements Iterator, Countable
             }
         }
 
-        $values = $this->unBox($this);
+        $values = $this->unBox();
 
         return $values;
     }
 
-    /**
-     * @param $items Box[]
-     * @return \Traversable mixed
-     */
-    private function unBox($items)
+
+    /** @return array */
+    private function unBox()
     {
         $values = [];
 
-        foreach ($items as $item) {
+        /** @var Box $item */
+        foreach ($this->values as $item) {
             $values[] = $item->getValue();
         }
 
         return $values;
     }
 
-    public function insert($value)
+    private function insert($value)
     {
         $this->values[] = $value;
 
         usort($this->values, $this->comparator);
 
-        if ($this->count() > $this->max) {
+        if (count($this->values) > $this->limit) {
             array_pop($this->values);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function current()
-    {
-        return $this->values[$this->currentKey];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->currentKey++;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->currentKey;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return array_key_exists($this->currentKey, $this->values);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->currentKey = 0;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        return count($this->values);
     }
 }

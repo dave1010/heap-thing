@@ -1,6 +1,5 @@
 <?php
 
-
 final class Box
 {
     /** @var mixed */
