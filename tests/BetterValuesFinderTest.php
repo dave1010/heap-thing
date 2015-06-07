@@ -4,9 +4,7 @@ class BetterValuesFinderTest extends \PHPUnit_Framework_TestCase
 {
     private function getComparator()
     {
-        return function (Box $a, Box $b) {
-            $a = $a->getValue();
-            $b = $b->getValue();
+        return function ($a, $b) {
             if ($a === $b) {
                 return 0;
             }

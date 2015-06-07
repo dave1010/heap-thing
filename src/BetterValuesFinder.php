@@ -13,20 +13,24 @@ class BetterValuesFinder
     /** @var int */
     private $limit;
 
-    private $values = [];
+    private $boxes = [];
 
     /**
-     * @param Box[] $boxes values with iterators to start from
-     * @param callable $comparator how to compare values
+     * @param Box[] $boxes of values and iterators to start from
+     * @param callable $comparator how to compare values inside boxes
      * @param int|null $limit maximum number of values to return when processed
      */
     public function __construct(array $boxes, callable $comparator, $limit = null)
     {
-        $this->comparator = $comparator;
+        // make $comparator work with Boxes
+        $this->comparator = function(Box $a, Box $b) use ($comparator) {
+            return $comparator($a->getValue(), $b->getValue());
+        };
+
         $this->limit = ($limit === null) ? count($boxes) : $limit;
 
-        foreach ($boxes as $value) {
-            $this->insert($value);
+        foreach ($boxes as $box) {
+            $this->insert($box);
         }
     }
 
@@ -39,7 +43,7 @@ class BetterValuesFinder
         while ($checksRequired) {
 
             /** @var Box $item */
-            foreach ($this->values as $item) {
+            foreach ($this->boxes as $item) {
 
                 $iterator = $item->getIterator();
                 if (!$iterator || !$iterator->valid()) {
@@ -67,22 +71,22 @@ class BetterValuesFinder
         $values = [];
 
         /** @var Box $item */
-        foreach ($this->values as $item) {
+        foreach ($this->boxes as $item) {
             $values[] = $item->getValue();
         }
 
         return $values;
     }
 
-    private function insert($value)
+    private function insert(Box $box)
     {
-        $this->values[] = $value;
+        $this->boxes[] = $box;
 
         // this resorts all values, when inserting to a heap would be better
-        usort($this->values, $this->comparator);
+        usort($this->boxes, $this->comparator);
 
-        if (count($this->values) > $this->limit) {
-            array_pop($this->values);
+        if (count($this->boxes) > $this->limit) {
+            array_pop($this->boxes);
         }
     }
 }
